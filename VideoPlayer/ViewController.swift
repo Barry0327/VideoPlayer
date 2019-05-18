@@ -16,10 +16,11 @@ class ViewController: UIViewController {
         return .lightContent
     }
 
+    var playerObserve: NSKeyValueObservation?
+
     let placeHolderWidth: CGFloat = -170
 
     lazy var offset = UIOffset(horizontal: (searchBar.frame.width - placeHolderWidth) / 2, vertical: 0)
-
 
     let searchBar: UISearchBar = {
 
@@ -39,7 +40,7 @@ class ViewController: UIViewController {
         let view = PlayerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         let player = AVPlayer.init()
-        player.addObserver(self, forKeyPath: "rate", options: NSKeyValueObservingOptions(rawValue: 0), context: nil)
+
         view.player = player
         view.backgroundColor = UIColor.init(red: 8/255, green: 21/255, blue: 35/255, alpha: 1)
 
@@ -93,24 +94,17 @@ class ViewController: UIViewController {
         setUpLayout()
 
         searchBar.setPositionAdjustment(offset, for: .search)
-    }
 
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
+        self.playerObserve = self.playerView.player?.observe(\.rate, changeHandler: { (player, _) in
 
-        if keyPath == "rate" {
-
-            if let playRate = self.playerView.player?.rate {
-
-                if playRate == 0.0 {
-                    print("Paused")
-                    self.playButton.setTitle("Play", for: .normal)
-                } else {
-                    print("Playing")
-                    self.playButton.setTitle("Pause", for: .normal)
-
-                }
+            if player.rate == 0.0 {
+                print("Paused")
+                self.playButton.setTitle("Play", for: .normal)
+            } else {
+                print("Playing")
+                self.playButton.setTitle("Pause", for: .normal)
             }
-        }
+        })
     }
 
     func setUpLayout() {
